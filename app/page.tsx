@@ -1,0 +1,166 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { useState } from "react"
+import { CreateRaffleForm } from "@/components/create-raffle-form"
+import { RaffleView } from "@/components/raffle-view"
+import { PublicRaffleView } from "@/components/public-raffle-view"
+
+export interface Raffle {
+  id: string
+  title: string
+  description: string
+  numbers: boolean[] // true = taken, false = available
+  isPublic?: boolean
+}
+
+export default function HomePage() {
+  const [currentView, setCurrentView] = useState<"home" | "create" | "view" | "public">("home")
+  const [currentRaffle, setCurrentRaffle] = useState<Raffle | null>(null)
+
+  const handleCreateRaffle = (title: string, description: string) => {
+    const newRaffle: Raffle = {
+      id: Date.now().toString(),
+      title,
+      description,
+      numbers: new Array(100).fill(false), // All numbers available initially
+    }
+    setCurrentRaffle(newRaffle)
+    setCurrentView("view")
+  }
+
+  const handleToggleNumber = (index: number) => {
+    if (!currentRaffle) return
+
+    const updatedNumbers = [...currentRaffle.numbers]
+    updatedNumbers[index] = !updatedNumbers[index]
+
+    setCurrentRaffle({
+      ...currentRaffle,
+      numbers: updatedNumbers,
+    })
+  }
+
+  const handleShareRaffle = () => {
+    if (!currentRaffle) return
+
+    const publicRaffle = { ...currentRaffle, isPublic: true }
+    setCurrentRaffle(publicRaffle)
+    setCurrentView("public")
+  }
+
+  const handleBackToHome = () => {
+    setCurrentView("home")
+    setCurrentRaffle(null)
+  }
+
+  if (currentView === "create") {
+    return <CreateRaffleForm onCreateRaffle={handleCreateRaffle} onBack={handleBackToHome} />
+  }
+
+  if (currentView === "view" && currentRaffle) {
+    return (
+      <RaffleView
+        raffle={currentRaffle}
+        onToggleNumber={handleToggleNumber}
+        onShare={handleShareRaffle}
+        onBack={handleBackToHome}
+      />
+    )
+  }
+
+  if (currentView === "public" && currentRaffle) {
+    return <PublicRaffleView raffle={currentRaffle} onBack={handleBackToHome} />
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-2xl mx-auto text-center">
+          {/* Header */}
+          <div className="mb-12">
+            <h1 className="text-5xl font-bold text-foreground mb-4 text-balance">Creador de Rifas</h1>
+            <p className="text-xl text-muted-foreground text-pretty">Crea y comparte rifas fácilmente en segundos</p>
+          </div>
+
+          {/* Main Action Card */}
+          <Card className="p-8 shadow-lg border-0 bg-card">
+            <CardContent className="p-0">
+              <div className="space-y-6">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                    />
+                  </svg>
+                </div>
+
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-semibold text-card-foreground">¿Listo para crear tu rifa?</h2>
+                  <p className="text-muted-foreground">
+                    Configura tu rifa en minutos y compártela con tus participantes
+                  </p>
+                </div>
+
+                <Button
+                  size="lg"
+                  className="w-full h-14 text-lg font-semibold"
+                  onClick={() => setCurrentView("create")}
+                >
+                  Crear rifa
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Features */}
+          <div className="grid md:grid-cols-3 gap-6 mt-16">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Rápido y fácil</h3>
+              <p className="text-sm text-muted-foreground">Crea rifas en segundos con nuestra interfaz intuitiva</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                  />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Fácil de compartir</h3>
+              <p className="text-sm text-muted-foreground">Comparte el enlace y deja que participen</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Control total</h3>
+              <p className="text-sm text-muted-foreground">Gestiona los números y ve el progreso en tiempo real</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
