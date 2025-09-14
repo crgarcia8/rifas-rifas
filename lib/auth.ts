@@ -4,10 +4,13 @@ const supabase = createClientComponentClient()
 
 export async function signInWithGoogle() {
   try {
+    const k = process.env.NEXT_PUBLIC_SITE_URL;
+    console.log("________________",k)
+    debugger
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+        redirectTo: `${k}/auth/callback`
       }
     })
 
