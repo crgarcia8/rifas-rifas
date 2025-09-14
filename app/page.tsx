@@ -1,28 +1,60 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useState } from "react"
-import { CreateRaffleForm } from "@/components/create-raffle-form"
-import { RaffleView } from "@/components/raffle-view"
-import { PublicRaffleView } from "@/components/public-raffle-view"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { User } from "@supabase/supabase-js";
+import { CreateRaffleForm } from "@/components/create-raffle-form";
+import { RaffleView } from "@/components/raffle-view";
+import { PublicRaffleView } from "@/components/public-raffle-view";
+import { GoogleSignInButton } from "@/components/ui/google-signin-button";
+import { signInWithGoogle } from "@/lib/auth";
+import { NavUserProfile } from "@/components/nav-user-profile";
+import RenderFromTemplateContext from "next/dist/client/components/render-from-template-context";
+import { MainLayout } from "@/components/main-layout";
 
 export interface RaffleNumber {
-  isTaken: boolean
-  participantName?: string
+  isTaken: boolean;
+  participantName?: string;
 }
 
 export interface Raffle {
-  id: string
-  title: string
-  description: string
-  numbers: RaffleNumber[] // Updated to include participant info
-  isPublic?: boolean
+  id: string;
+  title: string;
+  description: string;
+  numbers: RaffleNumber[]; // Updated to include participant info
+  isPublic?: boolean;
 }
 
 export default function HomePage() {
-  const [currentView, setCurrentView] = useState<"home" | "create" | "view" | "public">("home")
-  const [currentRaffle, setCurrentRaffle] = useState<Raffle | null>(null)
+  const [currentView, setCurrentView] = useState<
+    "home" | "create" | "view" | "public"
+  >("home");
+  const [currentRaffle, setCurrentRaffle] = useState<Raffle | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    fetchUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
 
   const handleCreateRaffle = (title: string, description: string) => {
     const newRaffle: Raffle = {
@@ -30,74 +62,92 @@ export default function HomePage() {
       title,
       description,
       numbers: new Array(100).fill(null).map(() => ({ isTaken: false })),
-    }
-    setCurrentRaffle(newRaffle)
-    setCurrentView("view")
-  }
+    };
+    setCurrentRaffle(newRaffle);
+    setCurrentView("view");
+  };
 
   const handleToggleNumber = (index: number, participantName?: string) => {
-    if (!currentRaffle) return
-    debugger
-    const updatedNumbers = [...currentRaffle.numbers]
-    const currentNumber = updatedNumbers[index]
+    if (!currentRaffle) return;
+    debugger;
+    const updatedNumbers = [...currentRaffle.numbers];
+    const currentNumber = updatedNumbers[index];
 
     if (currentNumber.isTaken) {
       // If taken, make it available and remove participant name
-      updatedNumbers[index] = { isTaken: false }
+      updatedNumbers[index] = { isTaken: false };
     } else {
       // If available, mark as taken with participant name
       updatedNumbers[index] = {
         isTaken: true,
         participantName: participantName || "Sin nombre",
-      }
+      };
     }
 
     setCurrentRaffle({
       ...currentRaffle,
       numbers: updatedNumbers,
-    })
-  }
+    });
+  };
 
   const handleShareRaffle = () => {
-    if (!currentRaffle) return
+    if (!currentRaffle) return;
 
-    const publicRaffle = { ...currentRaffle, isPublic: true }
-    setCurrentRaffle(publicRaffle)
-    setCurrentView("public")
-  }
+    const publicRaffle = { ...currentRaffle, isPublic: true };
+    setCurrentRaffle(publicRaffle);
+    setCurrentView("public");
+  };
 
   const handleBackToHome = () => {
-    setCurrentView("home")
-    setCurrentRaffle(null)
-  }
+    setCurrentView("home");
+    setCurrentRaffle(null);
+  };
 
+  // const renderContent = () => {
   if (currentView === "create") {
-    return <CreateRaffleForm onCreateRaffle={handleCreateRaffle} onBack={handleBackToHome} />
+    return (
+      <MainLayout>
+        <CreateRaffleForm
+          onCreateRaffle={handleCreateRaffle}
+          onBack={handleBackToHome}
+        />
+      </MainLayout>
+    );
   }
 
   if (currentView === "view" && currentRaffle) {
     return (
-      <RaffleView
-        raffle={currentRaffle}
-        onToggleNumber={handleToggleNumber}
-        onShare={handleShareRaffle}
-        onBack={handleBackToHome}
-      />
-    )
+      <MainLayout>
+        <RaffleView
+          raffle={currentRaffle}
+          onToggleNumber={handleToggleNumber}
+          onShare={handleShareRaffle}
+          onBack={handleBackToHome}
+        />
+      </MainLayout>
+    );
   }
 
   if (currentView === "public" && currentRaffle) {
-    return <PublicRaffleView raffle={currentRaffle} onBack={handleBackToHome} />
+    return (
+      <MainLayout>
+        <PublicRaffleView raffle={currentRaffle} onBack={handleBackToHome} />
+      </MainLayout>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <MainLayout>
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto text-center">
           {/* Header */}
           <div className="mb-12">
-            <h1 className="text-5xl font-bold text-foreground mb-4 text-balance">Creador de Rifas</h1>
-            <p className="text-xl text-muted-foreground text-pretty">Crea y comparte rifas fácilmente en segundos</p>
+            <h1 className="text-5xl font-bold text-foreground mb-4 text-balance">
+              Creador de Rifas
+            </h1>
+            <p className="text-xl text-muted-foreground text-pretty">
+              Crea y comparte rifas fácilmente en segundos
+            </p>
           </div>
 
           {/* Main Action Card */}
@@ -105,7 +155,12 @@ export default function HomePage() {
             <CardContent className="p-0">
               <div className="space-y-6">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-8 h-8 text-primary"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -116,19 +171,48 @@ export default function HomePage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h2 className="text-2xl font-semibold text-card-foreground">¿Listo para crear tu rifa?</h2>
+                  <h2 className="text-2xl font-semibold text-card-foreground">
+                    ¿Listo para crear tu rifa?
+                  </h2>
                   <p className="text-muted-foreground">
-                    Configura tu rifa en minutos y compártela con tus participantes
+                    Configura tu rifa en minutos y compártela con tus
+                    participantes
                   </p>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="w-full h-14 text-lg font-semibold"
-                  onClick={() => setCurrentView("create")}
-                >
-                  Crear rifa
-                </Button>
+                <div className="space-y-4">
+                  {user ? (
+                    <Button
+                      size="lg"
+                      className="w-full h-14 text-lg font-semibold"
+                      onClick={() => setCurrentView("create")}
+                    >
+                      Crear rifa
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        size="lg"
+                        className="w-full h-14 text-lg font-semibold"
+                        onClick={() => setCurrentView("create")}
+                        // disabled
+                      >
+                        Crear rifa
+                      </Button>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-card px-2 text-muted-foreground">
+                            Inicia sesión para crear
+                          </span>
+                        </div>
+                      </div>
+                      <GoogleSignInButton onClick={signInWithGoogle} />
+                    </>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -137,17 +221,36 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6 mt-16">
             <div className="text-center">
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-6 h-6 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Rápido y fácil</h3>
-              <p className="text-sm text-muted-foreground">Crea rifas en segundos con nuestra interfaz intuitiva</p>
+              <h3 className="font-semibold text-foreground mb-2">
+                Rápido y fácil
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Crea rifas en segundos con nuestra interfaz intuitiva
+              </p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -156,13 +259,22 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Fácil de compartir</h3>
-              <p className="text-sm text-muted-foreground">Comparte el enlace y deja que participen</p>
+              <h3 className="font-semibold text-foreground mb-2">
+                Fácil de compartir
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Comparte el enlace y deja que participen
+              </p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 text-accent"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -171,12 +283,16 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Control total</h3>
-              <p className="text-sm text-muted-foreground">Gestiona los números y ve el progreso en tiempo real</p>
+              <h3 className="font-semibold text-foreground mb-2">
+                Control total
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Gestiona los números y ve el progreso en tiempo real
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    </MainLayout>
+  );
 }

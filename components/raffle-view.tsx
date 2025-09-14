@@ -1,84 +1,99 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ArrowLeft, Share2, Download, User } from "lucide-react"
-import { useState } from "react"
-import type { Raffle } from "@/app/page"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Share2, Download, User } from "lucide-react";
+import { useState } from "react";
+import type { Raffle } from "@/app/page";
 
 interface RaffleViewProps {
-  raffle: Raffle
-  onToggleNumber: (index: number, participantName?: string) => void
-  onShare: () => void
-  onBack: () => void
+  raffle: Raffle;
+  onToggleNumber: (index: number, participantName?: string) => void;
+  onShare: () => void;
+  onBack: () => void;
 }
 
-export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleViewProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
-  const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
-  const [participantName, setParticipantName] = useState("")
+export function RaffleView({
+  raffle,
+  onToggleNumber,
+  onShare,
+  onBack,
+}: RaffleViewProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [participantName, setParticipantName] = useState("");
 
-  const takenCount = raffle.numbers.filter((number) => number.isTaken).length
-  const availableCount = 100 - takenCount
+  const takenCount = raffle.numbers.filter((number) => number.isTaken).length;
+  const availableCount = 100 - takenCount;
 
   const handleDownloadImage = () => {
     // Simple implementation - in a real app you'd generate an actual image
-    alert("Función de descarga de imagen - próximamente")
-  }
+    alert("Función de descarga de imagen - próximamente");
+  };
 
   const handleNumberClick = (index: number) => {
-    const number = raffle.numbers[index]
+    const number = raffle.numbers[index];
 
     if (number.isTaken) {
       // If already taken, show confirmation modal
-      setSelectedNumber(index)
-      setIsConfirmModalOpen(true)
+      setSelectedNumber(index);
+      setIsConfirmModalOpen(true);
     } else {
       // If available, open modal to get participant name
-      setSelectedNumber(index)
-      setParticipantName("")
-      setIsModalOpen(true)
+      setSelectedNumber(index);
+      setParticipantName("");
+      setIsModalOpen(true);
     }
-  }
+  };
 
   const handleModalConfirm = () => {
     if (selectedNumber !== null) {
-      onToggleNumber(selectedNumber, participantName.trim() || undefined)
-      setIsModalOpen(false)
-      setSelectedNumber(null)
-      setParticipantName("")
+      onToggleNumber(selectedNumber, participantName.trim() || undefined);
+      setIsModalOpen(false);
+      setSelectedNumber(null);
+      setParticipantName("");
     }
-  }
+  };
 
   const handleModalCancel = () => {
-    setIsModalOpen(false)
-    setSelectedNumber(null)
-    setParticipantName("")
-  }
+    setIsModalOpen(false);
+    setSelectedNumber(null);
+    setParticipantName("");
+  };
 
   const handleConfirmRelease = () => {
     if (selectedNumber !== null) {
-      onToggleNumber(selectedNumber)
-      setIsConfirmModalOpen(false)
-      setSelectedNumber(null)
+      onToggleNumber(selectedNumber);
+      setIsConfirmModalOpen(false);
+      setSelectedNumber(null);
     }
-  }
+  };
 
   const handleCancelRelease = () => {
-    setIsConfirmModalOpen(false)
-    setSelectedNumber(null)
-  }
+    setIsConfirmModalOpen(false);
+    setSelectedNumber(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
-          <Button variant="ghost" onClick={onBack} className="mb-8 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="mb-8 text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver al inicio
           </Button>
@@ -86,8 +101,12 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
           {/* Header Card */}
           <Card className="mb-8 shadow-lg border-0">
             <CardHeader>
-              <CardTitle className="text-3xl font-bold text-foreground text-balance">{raffle.title}</CardTitle>
-              <p className="text-lg text-muted-foreground text-pretty">{raffle.description}</p>
+              <CardTitle className="text-3xl font-bold text-foreground text-balance">
+                {raffle.title}
+              </CardTitle>
+              <p className="text-lg text-muted-foreground text-pretty">
+                {raffle.description}
+              </p>
               <div className="flex gap-4 text-sm text-muted-foreground mt-4">
                 <span className="flex items-center gap-2">
                   <div
@@ -97,7 +116,10 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
                   Disponibles: {availableCount}
                 </span>
                 <span className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--color-raffle-taken)" }}></div>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: "var(--color-raffle-taken)" }}
+                  ></div>
                   Ocupados: {takenCount}
                 </span>
               </div>
@@ -123,9 +145,15 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
                       }
                     `}
                     style={{
-                      backgroundColor: number.isTaken ? "var(--color-raffle-taken)" : "var(--color-raffle-available)",
+                      backgroundColor: number.isTaken
+                        ? "var(--color-raffle-taken)"
+                        : "var(--color-raffle-available)",
                     }}
-                    title={number.isTaken ? `Ocupado por: ${number.participantName}` : "Disponible"}
+                    title={
+                      number.isTaken
+                        ? `Ocupado por: ${number.participantName}`
+                        : "Disponible"
+                    }
                   >
                     <span className="font-bold">{index + 1}</span>
                     {number.isTaken && (
@@ -156,7 +184,11 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
               <Share2 className="w-5 h-5 mr-2" />
               Compartir link
             </Button>
-            <Button size="lg" onClick={handleDownloadImage} className="flex-1 h-14 text-base font-semibold">
+            <Button
+              size="lg"
+              onClick={handleDownloadImage}
+              className="flex-1 h-14 text-base font-semibold"
+            >
               <Download className="w-5 h-5 mr-2" />
               Descargar imagen
             </Button>
@@ -184,14 +216,16 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
                 onChange={(e) => setParticipantName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleModalConfirm()
+                    handleModalConfirm();
                   }
                 }}
                 autoFocus
                 className="w-full"
               />
             </div>
-            <p className="text-sm text-muted-foreground">Este número quedará marcado como ocupado por esta persona.</p>
+            <p className="text-sm text-muted-foreground">
+              Este número quedará marcado como ocupado por esta persona.
+            </p>
           </div>
           <DialogFooter className="flex gap-2">
             <Button variant="outline" onClick={handleModalCancel}>
@@ -213,11 +247,13 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
             <p className="text-sm text-muted-foreground">
               Este número está ocupado por:{" "}
               <span className="font-semibold text-foreground">
-                {selectedNumber !== null && raffle.numbers[selectedNumber]?.participantName}
+                {selectedNumber !== null &&
+                  raffle.numbers[selectedNumber]?.participantName}
               </span>
             </p>
             <p className="text-sm text-muted-foreground">
-              ¿Estás seguro de que quieres liberar este número? Quedará disponible nuevamente para otros participantes.
+              ¿Estás seguro de que quieres liberar este número? Quedará
+              disponible nuevamente para otros participantes.
             </p>
           </div>
           <DialogFooter className="flex gap-2">
@@ -231,5 +267,5 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

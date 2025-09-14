@@ -1,37 +1,45 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft } from "lucide-react";
+import { NavUserProfile } from "./nav-user-profile";
 
 interface CreateRaffleFormProps {
-  onCreateRaffle: (title: string, description: string) => void
-  onBack: () => void
+  onCreateRaffle: (title: string, description: string) => void;
+  onBack: () => void;
 }
 
-export function CreateRaffleForm({ onCreateRaffle, onBack }: CreateRaffleFormProps) {
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+export function CreateRaffleForm({
+  onCreateRaffle,
+  onBack,
+}: CreateRaffleFormProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (title.trim() && description.trim()) {
-      onCreateRaffle(title.trim(), description.trim())
+      onCreateRaffle(title.trim(), description.trim());
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Back Button */}
-          <Button variant="ghost" onClick={onBack} className="mb-8 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="mb-8 text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver al inicio
           </Button>
@@ -39,14 +47,21 @@ export function CreateRaffleForm({ onCreateRaffle, onBack }: CreateRaffleFormPro
           {/* Form Card */}
           <Card className="shadow-lg border-0">
             <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl font-bold text-foreground">Crear nueva rifa</CardTitle>
-              <p className="text-muted-foreground mt-2">Completa los datos para configurar tu rifa</p>
+              <CardTitle className="text-3xl font-bold text-foreground">
+                Crear nueva rifa
+              </CardTitle>
+              <p className="text-muted-foreground mt-2">
+                Completa los datos para configurar tu rifa
+              </p>
             </CardHeader>
 
             <CardContent className="px-8 pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="title"
+                    className="text-sm font-medium text-foreground"
+                  >
                     Título de la rifa
                   </Label>
                   <Input
@@ -61,7 +76,10 @@ export function CreateRaffleForm({ onCreateRaffle, onBack }: CreateRaffleFormPro
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium text-foreground">
+                  <Label
+                    htmlFor="description"
+                    className="text-sm font-medium text-foreground"
+                  >
                     Descripción breve
                   </Label>
                   <Textarea
@@ -75,19 +93,37 @@ export function CreateRaffleForm({ onCreateRaffle, onBack }: CreateRaffleFormPro
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-foreground">Rango de números</Label>
+                  <Label className="text-sm font-medium text-foreground">
+                    Rango de números
+                  </Label>
                   <div className="flex items-center space-x-4 p-4 bg-muted rounded-lg">
                     <div className="flex-1">
-                      <Input type="number" value="1" disabled className="bg-background" />
-                      <Label className="text-xs text-muted-foreground mt-1 block">Desde</Label>
+                      <Input
+                        type="number"
+                        value="1"
+                        disabled
+                        className="bg-background"
+                      />
+                      <Label className="text-xs text-muted-foreground mt-1 block">
+                        Desde
+                      </Label>
                     </div>
                     <div className="text-muted-foreground">hasta</div>
                     <div className="flex-1">
-                      <Input type="number" value="100" disabled className="bg-background" />
-                      <Label className="text-xs text-muted-foreground mt-1 block">Hasta</Label>
+                      <Input
+                        type="number"
+                        value="100"
+                        disabled
+                        className="bg-background"
+                      />
+                      <Label className="text-xs text-muted-foreground mt-1 block">
+                        Hasta
+                      </Label>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Por ahora solo soportamos rifas de 1 a 100 números</p>
+                  <p className="text-xs text-muted-foreground">
+                    Por ahora solo soportamos rifas de 1 a 100 números
+                  </p>
                 </div>
 
                 <Button
@@ -104,5 +140,5 @@ export function CreateRaffleForm({ onCreateRaffle, onBack }: CreateRaffleFormPro
         </div>
       </div>
     </div>
-  )
+  );
 }
