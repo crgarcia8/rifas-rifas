@@ -49,6 +49,10 @@ export default function HomePage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) {
+        setCurrentView("home");
+        setCurrentRaffle(null);
+      }
     });
 
     return () => {
@@ -69,7 +73,6 @@ export default function HomePage() {
 
   const handleToggleNumber = (index: number, participantName?: string) => {
     if (!currentRaffle) return;
-    debugger;
     const updatedNumbers = [...currentRaffle.numbers];
     const currentNumber = updatedNumbers[index];
 

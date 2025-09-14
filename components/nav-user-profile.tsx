@@ -6,7 +6,11 @@ import { Button } from "./ui/button"
 import { User } from "@supabase/supabase-js"
 import Image from "next/image"
 
-export function NavUserProfile() {
+interface NavUserProfileProps {
+  onSignOut?: () => void
+}
+
+export function NavUserProfile({ onSignOut }: NavUserProfileProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
@@ -14,7 +18,6 @@ export function NavUserProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      debugger
       setUser(user)
       setLoading(false)
     }
@@ -32,6 +35,7 @@ export function NavUserProfile() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    onSignOut?.()
   }
 
   if (loading) {
