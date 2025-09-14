@@ -18,6 +18,7 @@ interface RaffleViewProps {
 
 export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null)
   const [participantName, setParticipantName] = useState("")
 
@@ -33,8 +34,9 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
     const number = raffle.numbers[index]
 
     if (number.isTaken) {
-      // If already taken, toggle it back to available
-      onToggleNumber(index)
+      // If already taken, show confirmation modal
+      setSelectedNumber(index)
+      setIsConfirmModalOpen(true)
     } else {
       // If available, open modal to get participant name
       setSelectedNumber(index)
@@ -56,6 +58,19 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
     setIsModalOpen(false)
     setSelectedNumber(null)
     setParticipantName("")
+  }
+
+  const handleConfirmRelease = () => {
+    if (selectedNumber !== null) {
+      onToggleNumber(selectedNumber)
+      setIsConfirmModalOpen(false)
+      setSelectedNumber(null)
+    }
+  }
+
+  const handleCancelRelease = () => {
+    setIsConfirmModalOpen(false)
+    setSelectedNumber(null)
   }
 
   return (
@@ -149,6 +164,7 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
         </div>
       </div>
 
+      {/* Modal for adding participant name */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -182,6 +198,35 @@ export function RaffleView({ raffle, onToggleNumber, onShare, onBack }: RaffleVi
               Cancelar
             </Button>
             <Button onClick={handleModalConfirm}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              Liberar número {selectedNumber !== null ? selectedNumber + 1 : ""}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Este número está ocupado por:{" "}
+              <span className="font-semibold text-foreground">
+                {selectedNumber !== null && raffle.numbers[selectedNumber]?.participantName}
+              </span>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              ¿Estás seguro de que quieres liberar este número? Quedará disponible nuevamente para otros participantes.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={handleCancelRelease}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmRelease}>
+              Liberar número
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
