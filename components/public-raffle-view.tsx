@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Eye } from "lucide-react"
+import { ArrowLeft, Eye, User } from "lucide-react"
 import type { Raffle } from "@/app/page"
 
 interface PublicRaffleViewProps {
@@ -11,7 +11,7 @@ interface PublicRaffleViewProps {
 }
 
 export function PublicRaffleView({ raffle, onBack }: PublicRaffleViewProps) {
-  const takenCount = raffle.numbers.filter((taken) => taken).length
+  const takenCount = raffle.numbers.filter((number) => number.isTaken).length
   const availableCount = 100 - takenCount
 
   return (
@@ -57,19 +57,31 @@ export function PublicRaffleView({ raffle, onBack }: PublicRaffleViewProps) {
           <Card className="mb-8 shadow-lg border-0">
             <CardContent className="p-6">
               <div className="grid grid-cols-10 gap-2">
-                {raffle.numbers.map((isTaken, index) => (
+                {raffle.numbers.map((number, index) => (
                   <div
                     key={index}
                     className={`
-                      aspect-square rounded-lg border-2 font-semibold text-sm
-                      flex items-center justify-center cursor-default
-                      ${isTaken ? "border-gray-300 text-gray-500" : "border-emerald-300 text-emerald-700"}
+                      aspect-square rounded-lg border-2 font-semibold text-xs
+                      flex flex-col items-center justify-center cursor-default p-1
+                      ${number.isTaken ? "border-gray-300 text-gray-500" : "border-emerald-300 text-emerald-700"}
                     `}
                     style={{
-                      backgroundColor: isTaken ? "var(--color-raffle-taken)" : "var(--color-raffle-available)",
+                      backgroundColor: number.isTaken ? "var(--color-raffle-taken)" : "var(--color-raffle-available)",
                     }}
+                    title={number.isTaken ? `Ocupado por: ${number.participantName}` : "Disponible"}
                   >
-                    {index + 1}
+                    <span className="font-bold">{index + 1}</span>
+                    {number.isTaken && (
+                      <div className="flex items-center justify-center mt-0.5">
+                        {number.participantName ? (
+                          <span className="text-[8px] leading-none truncate max-w-full">
+                            {number.participantName.split(" ")[0]}
+                          </span>
+                        ) : (
+                          <User className="w-2 h-2" />
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

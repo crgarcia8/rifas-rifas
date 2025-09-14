@@ -7,11 +7,16 @@ import { CreateRaffleForm } from "@/components/create-raffle-form"
 import { RaffleView } from "@/components/raffle-view"
 import { PublicRaffleView } from "@/components/public-raffle-view"
 
+export interface RaffleNumber {
+  isTaken: boolean
+  participantName?: string
+}
+
 export interface Raffle {
   id: string
   title: string
   description: string
-  numbers: boolean[] // true = taken, false = available
+  numbers: RaffleNumber[] // Updated to include participant info
   isPublic?: boolean
 }
 
@@ -24,17 +29,28 @@ export default function HomePage() {
       id: Date.now().toString(),
       title,
       description,
-      numbers: new Array(100).fill(false), // All numbers available initially
+      numbers: new Array(100).fill(null).map(() => ({ isTaken: false })),
     }
     setCurrentRaffle(newRaffle)
     setCurrentView("view")
   }
 
-  const handleToggleNumber = (index: number) => {
+  const handleToggleNumber = (index: number, participantName?: string) => {
     if (!currentRaffle) return
 
     const updatedNumbers = [...currentRaffle.numbers]
-    updatedNumbers[index] = !updatedNumbers[index]
+    const currentNumber = updatedNumbers[index]
+
+    if (currentNumber.isTaken) {
+      // If taken, make it available and remove participant name
+      updatedNumbers[index] = { isTaken: false }
+    } else {
+      // If available, mark as taken with participant name
+      updatedNumbers[index] = {
+        isTaken: true,
+        participantName: participantName || "Sin nombre",
+      }
+    }
 
     setCurrentRaffle({
       ...currentRaffle,
