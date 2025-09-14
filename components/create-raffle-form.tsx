@@ -1,32 +1,64 @@
 "use client";
 
-import type React from "react";
-
 import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
-import { NavUserProfile } from "./nav-user-profile";
+import type { CreateRaffleData } from "@/types/raffle";
 
 interface CreateRaffleFormProps {
-  onCreateRaffle: (title: string, description: string) => void;
   onBack: () => void;
 }
 
 export function CreateRaffleForm({
-  onCreateRaffle,
   onBack,
 }: CreateRaffleFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<CreateRaffleData>({
+    title: "",
+    description: "",
+    goal: "",
+    range_start: 1,
+    range_end: 100,
+    ticket_cost: 0,
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && description.trim()) {
-      onCreateRaffle(title.trim(), description.trim());
+    if (!formData.title.trim() || formData.ticket_cost <= 0) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        throw new Error("No user found");
+      }
+
+      const { data: raffle, error } = await supabase
+        .from('tbl_raffle')
+        .insert({
+          ...formData,
+          creator_id: userData.user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Navigate to the dashboard after successful creation
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error creating raffle:', error);
+      // TODO: Show error message to user
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,8 +100,8 @@ export function CreateRaffleForm({
                     id="title"
                     type="text"
                     placeholder="Ej: Rifa de fin de año 2024"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
                     className="h-12 text-base"
                     required
                   />
@@ -85,10 +117,26 @@ export function CreateRaffleForm({
                   <Textarea
                     id="description"
                     placeholder="Describe tu rifa, premio, fecha del sorteo, etc."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
                     className="min-h-[100px] text-base resize-none"
-                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="goal"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Meta (opcional)
+                  </Label>
+                  <Input
+                    id="goal"
+                    type="text"
+                    placeholder="Ej: Compra de equipamiento deportivo"
+                    value={formData.goal || ""}
+                    onChange={(e) => setFormData({...formData, goal: e.target.value})}
+                    className="h-12 text-base"
                   />
                 </div>
 
@@ -126,13 +174,38 @@ export function CreateRaffleForm({
                   </p>
                 </div>
 
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="ticket_cost"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Precio por número
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                      $
+                    </span>
+                    <Input
+                      id="ticket_cost"
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={formData.ticket_cost || ""}
+                      onChange={(e) => setFormData({...formData, ticket_cost: parseFloat(e.target.value) || 0})}
+                      className="pl-8 h-12 text-base"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full h-14 text-lg font-semibold mt-8"
-                  disabled={!title.trim() || !description.trim()}
+                  disabled={isSubmitting || !formData.title.trim() || formData.ticket_cost <= 0}
                 >
-                  Generar rifa
+                  {isSubmitting ? "Creando..." : "Generar rifa"}
                 </Button>
               </form>
             </CardContent>

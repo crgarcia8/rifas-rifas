@@ -14,24 +14,8 @@ import { NavUserProfile } from "@/components/nav-user-profile";
 import RenderFromTemplateContext from "next/dist/client/components/render-from-template-context";
 import { MainLayout } from "@/components/main-layout";
 
-export interface RaffleNumber {
-  isTaken: boolean;
-  participantName?: string;
-}
-
-export interface Raffle {
-  id: string;
-  title: string;
-  description: string;
-  numbers: RaffleNumber[]; // Updated to include participant info
-  isPublic?: boolean;
-}
-
 export default function HomePage() {
-  const [currentView, setCurrentView] = useState<
-    "home" | "create" | "view" | "public"
-  >("home");
-  const [currentRaffle, setCurrentRaffle] = useState<Raffle | null>(null);
+  const [currentView, setCurrentView] = useState<"home" | "create">("home");
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClientComponentClient();
 
@@ -51,7 +35,6 @@ export default function HomePage() {
       setUser(session?.user ?? null);
       if (!session?.user) {
         setCurrentView("home");
-        setCurrentRaffle(null);
       }
     });
 
@@ -60,81 +43,15 @@ export default function HomePage() {
     };
   }, [supabase.auth]);
 
-  const handleCreateRaffle = (title: string, description: string) => {
-    const newRaffle: Raffle = {
-      id: Date.now().toString(),
-      title,
-      description,
-      numbers: new Array(100).fill(null).map(() => ({ isTaken: false })),
-    };
-    setCurrentRaffle(newRaffle);
-    setCurrentView("view");
-  };
-
-  const handleToggleNumber = (index: number, participantName?: string) => {
-    if (!currentRaffle) return;
-    const updatedNumbers = [...currentRaffle.numbers];
-    const currentNumber = updatedNumbers[index];
-
-    if (currentNumber.isTaken) {
-      // If taken, make it available and remove participant name
-      updatedNumbers[index] = { isTaken: false };
-    } else {
-      // If available, mark as taken with participant name
-      updatedNumbers[index] = {
-        isTaken: true,
-        participantName: participantName || "Sin nombre",
-      };
-    }
-
-    setCurrentRaffle({
-      ...currentRaffle,
-      numbers: updatedNumbers,
-    });
-  };
-
-  const handleShareRaffle = () => {
-    if (!currentRaffle) return;
-
-    const publicRaffle = { ...currentRaffle, isPublic: true };
-    setCurrentRaffle(publicRaffle);
-    setCurrentView("public");
-  };
-
   const handleBackToHome = () => {
     setCurrentView("home");
-    setCurrentRaffle(null);
   };
 
   // const renderContent = () => {
   if (currentView === "create") {
     return (
       <MainLayout>
-        <CreateRaffleForm
-          onCreateRaffle={handleCreateRaffle}
-          onBack={handleBackToHome}
-        />
-      </MainLayout>
-    );
-  }
-
-  if (currentView === "view" && currentRaffle) {
-    return (
-      <MainLayout>
-        <RaffleView
-          raffle={currentRaffle}
-          onToggleNumber={handleToggleNumber}
-          onShare={handleShareRaffle}
-          onBack={handleBackToHome}
-        />
-      </MainLayout>
-    );
-  }
-
-  if (currentView === "public" && currentRaffle) {
-    return (
-      <MainLayout>
-        <PublicRaffleView raffle={currentRaffle} onBack={handleBackToHome} />
+        <CreateRaffleForm onBack={handleBackToHome} />
       </MainLayout>
     );
   }
@@ -185,13 +102,33 @@ export default function HomePage() {
 
                 <div className="space-y-4">
                   {user ? (
-                    <Button
-                      size="lg"
-                      className="w-full h-14 text-lg font-semibold"
-                      onClick={() => setCurrentView("create")}
-                    >
-                      Crear rifa
-                    </Button>
+                    <div className="space-y-4">
+                      <Button
+                        size="lg"
+                        className="w-full h-14 text-lg font-semibold"
+                        onClick={() => setCurrentView("create")}
+                      >
+                        Crear rifa
+                      </Button>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-card px-2 text-muted-foreground">
+                            o
+                          </span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full h-14 text-lg"
+                        onClick={() => window.location.href = '/dashboard'}
+                      >
+                        Ir al Dashboard
+                      </Button>
+                    </div>
                   ) : (
                     <>
                       <Button
