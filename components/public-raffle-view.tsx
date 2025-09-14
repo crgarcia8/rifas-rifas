@@ -71,17 +71,6 @@ export function PublicRaffleView({ raffle, onBack }: PublicRaffleViewProps) {
                     title={number.isTaken ? `Ocupado por: ${number.participantName}` : "Disponible"}
                   >
                     <span className="font-bold">{index + 1}</span>
-                    {number.isTaken && (
-                      <div className="flex items-center justify-center mt-0.5">
-                        {number.participantName ? (
-                          <span className="text-[8px] leading-none truncate max-w-full">
-                            {number.participantName.split(" ")[0]}
-                          </span>
-                        ) : (
-                          <User className="w-2 h-2" />
-                        )}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

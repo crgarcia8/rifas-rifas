@@ -37,7 +37,7 @@ export default function HomePage() {
 
   const handleToggleNumber = (index: number, participantName?: string) => {
     if (!currentRaffle) return
-
+    debugger
     const updatedNumbers = [...currentRaffle.numbers]
     const currentNumber = updatedNumbers[index]
 
