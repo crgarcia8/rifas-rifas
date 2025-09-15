@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { RaffleService } from "@/lib/services";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,6 @@ export function CreateRaffleForm({
   onBack,
 }: CreateRaffleFormProps) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<CreateRaffleData>({
     title: "",
@@ -36,27 +35,11 @@ export function CreateRaffleForm({
 
     setIsSubmitting(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error("No user found");
-      }
-
-      const { data: raffle, error } = await supabase
-        .from('tbl_raffle')
-        .insert({
-          ...formData,
-          creator_id: userData.user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Navigate to the dashboard after successful creation
+      await RaffleService.createRaffle(formData);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error creating raffle:', error);
-      // TODO: Show error message to user
+      // TODO: Mostrar error al usuario usando un componente de toast o alert
     } finally {
       setIsSubmitting(false);
     }

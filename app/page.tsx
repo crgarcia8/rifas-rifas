@@ -13,9 +13,9 @@ import { signInWithGoogle } from "@/lib/auth";
 import { NavUserProfile } from "@/components/nav-user-profile";
 import RenderFromTemplateContext from "next/dist/client/components/render-from-template-context";
 import { MainLayout } from "@/components/main-layout";
+import { Container } from "@/components/ui/container";
 
 export default function HomePage() {
-  const [currentView, setCurrentView] = useState<"home" | "create">("home");
   const [user, setUser] = useState<User | null>(null);
   const supabase = createClientComponentClient();
 
@@ -33,9 +33,6 @@ export default function HomePage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session?.user) {
-        setCurrentView("home");
-      }
     });
 
     return () => {
@@ -43,122 +40,109 @@ export default function HomePage() {
     };
   }, [supabase.auth]);
 
-  const handleBackToHome = () => {
-    setCurrentView("home");
-  };
-
-  // const renderContent = () => {
-  if (currentView === "create") {
-    return (
-      <MainLayout>
-        <CreateRaffleForm onBack={handleBackToHome} />
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto text-center">
-          {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-5xl font-bold text-foreground mb-4 text-balance">
-              Creador de Rifas
-            </h1>
-            <p className="text-xl text-muted-foreground text-pretty">
-              Crea y comparte rifas fácilmente en segundos
-            </p>
-          </div>
+      <Container>
+        <div className="py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            {/* Header */}
+            <div className="mb-12">
+              <h1 className="text-5xl font-bold text-foreground mb-4 text-balance">
+                Creador de Rifas
+              </h1>
+              <p className="text-xl text-muted-foreground text-pretty">
+                Crea y comparte rifas fácilmente en segundos
+              </p>
+            </div>
 
-          {/* Main Action Card */}
-          <Card className="p-8 shadow-lg border-0 bg-card">
-            <CardContent className="p-0">
-              <div className="space-y-6">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg
-                    className="w-8 h-8 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-                    />
-                  </svg>
-                </div>
+            {/* Main Action Card */}
+            <Card className="p-8 shadow-lg border-0 bg-card">
+              <CardContent className="p-0">
+                <div className="space-y-6">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg
+                      className="w-8 h-8 text-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                      />
+                    </svg>
+                  </div>
 
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-semibold text-card-foreground">
-                    ¿Listo para crear tu rifa?
-                  </h2>
-                  <p className="text-muted-foreground">
-                    Configura tu rifa en minutos y compártela con tus
-                    participantes
-                  </p>
-                </div>
+                  <div className="space-y-4">
+                    <h2 className="text-2xl font-semibold text-card-foreground">
+                      ¿Listo para crear tu rifa?
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Configura tu rifa en minutos y compártela con tus
+                      participantes
+                    </p>
+                  </div>
 
-                <div className="space-y-4">
-                  {user ? (
-                    <div className="space-y-4">
-                      <Button
-                        size="lg"
-                        className="w-full h-14 text-lg font-semibold"
-                        onClick={() => setCurrentView("create")}
-                      >
-                        Crear rifa
-                      </Button>
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t" />
+                  <div className="space-y-4">
+                    {user ? (
+                      <div className="space-y-4">
+                        <Button
+                          size="lg"
+                          className="w-full h-14 text-lg font-semibold"
+                          onClick={() => (window.location.href = "/crear")}
+                        >
+                          Crear rifa
+                        </Button>
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-card px-2 text-muted-foreground">
+                              o
+                            </span>
+                          </div>
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-card px-2 text-muted-foreground">
-                            o
-                          </span>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="w-full h-14 text-lg"
+                          onClick={() => (window.location.href = "/dashboard")}
+                        >
+                          Ir al Dashboard
+                        </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="w-full h-14 text-lg"
-                        onClick={() => window.location.href = '/dashboard'}
-                      >
-                        Ir al Dashboard
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <Button
-                        size="lg"
-                        className="w-full h-14 text-lg font-semibold"
-                        onClick={() => setCurrentView("create")}
-                        // disabled
-                      >
-                        Crear rifa
-                      </Button>
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t" />
+                    ) : (
+                      <>
+                        <Button
+                          size="lg"
+                          className="w-full h-14 text-lg font-semibold"
+                          onClick={() => (window.location.href = "/crear")}
+                          // disabled
+                        >
+                          Crear rifa
+                        </Button>
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-card px-2 text-muted-foreground">
+                              Inicia sesión para crear
+                            </span>
+                          </div>
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-card px-2 text-muted-foreground">
-                            Inicia sesión para crear
-                          </span>
-                        </div>
-                      </div>
-                      <GoogleSignInButton onClick={signInWithGoogle} />
-                    </>
-                  )}
+                        <GoogleSignInButton onClick={signInWithGoogle} />
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-6 mt-16">
+            {/* Features */}
             <div className="text-center">
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg
@@ -232,7 +216,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </MainLayout>
   );
 }

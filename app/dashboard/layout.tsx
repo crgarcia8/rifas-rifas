@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-bold">
-              Rifas-Rifas1
+              Rifas-Rifas
             </Link>
             <div className="flex items-center gap-4">
               <Link
@@ -29,16 +29,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 }`}
               >
                 Dashboard
-              </Link>
-              <Link
-                href="/dashboard/mis-rifas"
-                className={`text-sm ${
-                  pathname.includes("/dashboard/mis-rifas")
-                    ? "text-foreground font-semibold"
-                    : "text-muted-foreground"
-                }`}
-              >
-                Mis Rifas
               </Link>
             </div>
           </div>

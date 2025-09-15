@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RaffleService } from "@/lib/services";
 import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
 import Link from "next/link";
 import { Plus, Box, Settings, Share2, Trash2 } from "lucide-react";
 import type { Raffle } from "@/types/raffle";
@@ -11,21 +12,12 @@ import type { Raffle } from "@/types/raffle";
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [raffles, setRaffles] = useState<Raffle[]>([]);
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const fetchRaffles = async () => {
       try {
-        const { data: userRaffles, error } = await supabase
-          .from('tbl_raffle')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        setRaffles(userRaffles || []);
+        const userRaffles = await RaffleService.getRaffles();
+        setRaffles(userRaffles);
       } catch (error) {
         console.error('Error fetching raffles:', error);
         // TODO: Show error message to user
@@ -35,24 +27,17 @@ export default function DashboardPage() {
     };
 
     fetchRaffles();
-  }, [supabase]);
+  }, []);
 
   const handleDeleteRaffle = async (raffleId: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar esta rifa?')) return;
 
     try {
-      const { error } = await supabase
-        .from('tbl_raffle')
-        .delete()
-        .match({ id: raffleId });
-
-      if (error) throw error;
-
-      // Update local state to remove the deleted raffle
+      await RaffleService.deleteRaffle(raffleId);
       setRaffles(raffles.filter(raffle => raffle.id !== raffleId));
     } catch (error) {
       console.error('Error deleting raffle:', error);
-      // TODO: Show error message to user
+      // TODO: Mostrar error al usuario usando un componente de toast o alert
     }
   };
 
@@ -64,8 +49,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
+    <Container>
+      <div className="py-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Mis Rifas</h1>
@@ -168,7 +153,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
       </div>
+    </Container>
   );
 }

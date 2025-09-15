@@ -68,7 +68,7 @@ export function NavUserProfile({ onSignOut }: NavUserProfileProps) {
         )}
       </div>
       <Button variant="outline" size="sm" onClick={handleSignOut}>
-        Cerrar sesión2
+        Cerrar sesión
       </Button>
     </div>
   );
