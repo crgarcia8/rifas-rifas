@@ -3,7 +3,7 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Raffle } from "@/app/page"
+import { Raffle } from "@/types/raffle"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -265,3 +265,4 @@ export default function RaffleSettingsPage() {
       </div>
     </div>
   )
+}
